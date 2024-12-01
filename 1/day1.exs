@@ -1,26 +1,35 @@
-# part 1
+defmodule Day01 do
+  defp parse do
+    File.read!("1/input.txt")
+    |> String.split("\n")
+    |> Enum.map(&String.split(&1, " ", trim: true))
+    |> Enum.map(&Enum.map(&1, fn s -> String.to_integer(s) end))
+    |> Enum.map(&List.to_tuple/1)
+    |> Enum.unzip()
+  end
 
-{left, right} =
-  File.read!("1/input.txt")
-  |> String.split("\n")
-  |> Enum.map(&String.split(&1, " ", trim: true))
-  |> Enum.map(&Enum.map(&1, fn s -> String.to_integer(s) end))
-  |> Enum.map(&List.to_tuple/1)
-  |> Enum.unzip()
+  def part1 do
+    {left, right} = parse()
 
-left_sorted = Enum.sort(left)
-right_sorted = Enum.sort(right)
+    Enum.zip(Enum.sort(left), Enum.sort(right))
+    |> Enum.map(fn {l, r} -> abs(l - r) end)
+    |> Enum.sum()
+    |> IO.puts()
+  end
 
-Enum.zip(left_sorted, right_sorted)
-|> Enum.map(fn {l, r} -> abs(l - r) end)
-|> Enum.sum()
-|> IO.puts()
+  def part2 do
+    {left, right} = parse()
 
-# part 2
+    counts = Enum.frequencies(right)
 
-left
-|> Enum.map(fn int ->
-  Enum.count(right, &(&1 == int)) * int
-end)
-|> Enum.sum()
-|> IO.puts()
+    left
+    |> Enum.map(fn num ->
+      Map.get(counts, num, 0) * num
+    end)
+    |> Enum.sum()
+    |> IO.puts()
+  end
+end
+
+Day01.part1()
+Day01.part2()

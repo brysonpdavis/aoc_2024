@@ -11,15 +11,21 @@ defmodule Day02 do
   end
 
   defp all_diffs_within_bounds(report) do
-    Enum.all?(get_adjacent_pairs(report), fn {x, y} -> 1 <= abs(x - y) and abs(x - y) <= 3 end)
+    report
+    |> get_adjacent_pairs()
+    |> Enum.all?(fn {x, y} -> 1 <= abs(x - y) and abs(x - y) <= 3 end)
   end
 
   defp all_descending(report) do
-    Enum.all?(get_adjacent_pairs(report), fn {x, y} -> x > y end)
+    report
+    |> get_adjacent_pairs()
+    |> Enum.all?(fn {x, y} -> x > y end)
   end
 
   defp all_ascending(report) do
-    Enum.all?(get_adjacent_pairs(report), fn {x, y} -> x < y end)
+    report
+    |> get_adjacent_pairs()
+    |> Enum.all?(fn {x, y} -> x < y end)
   end
 
   defp is_safe?(report) do

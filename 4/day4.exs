@@ -18,10 +18,11 @@ defmodule Day04 do
     0..length(list_grid)
     |> Enum.map(fn x ->
       0..tuple_size(elem(tuple_grid, 0))
-      |> Enum.map(&get_all_direction_strings_for_coord(tuple_grid, {x, &1}))
-      |> List.flatten()
-      |> Enum.map(&String.starts_with?(&1, "XMAS"))
-      |> Enum.count(fn x -> x == true end)
+      |> Enum.map(fn y ->
+        tuple_grid
+        |> get_all_direction_strings_for_coord({x, y})
+        |> Enum.count(&String.starts_with?(&1, "XMAS"))
+      end)
     end)
     |> List.flatten()
     |> Enum.sum()
@@ -35,11 +36,11 @@ defmodule Day04 do
     0..length(list_grid)
     |> Enum.map(fn x ->
       0..tuple_size(elem(tuple_grid, 0))
-      # v replace with function to map a grid and a space to the X
-      |> Enum.map(&get_all_direction_strings_for_coord(tuple_grid, {x, &1}))
-      # v replace with function to count the number of XMAS strings
-      |> Enum.map(&String.starts_with?(&1, "XMAS"))
-      |> Enum.count(fn x -> x == true end)
+      |> Enum.count(fn y ->
+        tuple_grid
+        |> get_x_for_coord({x, y})
+        |> x_is_xmas?()
+      end)
     end)
     |> List.flatten()
     |> Enum.sum()
@@ -50,32 +51,54 @@ defmodule Day04 do
     [{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}]
   end
 
-  def get_all_direction_strings_for_coord(grid, {x, y}) do
+  def get_all_direction_strings_for_coord(grid, coord) do
     directions()
-    |> Enum.map(fn {dx, dy} ->
-      get_direction_string(grid, {x, y}, {dx, dy})
+    |> Enum.map(fn direction ->
+      get_direction_string(grid, coord, direction)
     end)
   end
 
   def get_direction_string(grid, {x, y}, {dx, dy}) do
-    Enum.reduce_while(0..3, "", fn i, acc ->
+    get_direction_string_idx = fn i ->
       new_x = x + i * dx
       new_y = y + i * dy
 
       {grid_max_x, grid_max_y} = get_tuple_grid_dimensions(grid)
 
       if new_x < 0 or new_x >= grid_max_x or new_y < 0 or new_y >= grid_max_y do
-        {:halt, acc}
+        ""
       else
-        case elem(elem(grid, new_x), new_y) do
-          nil ->
-            {:cont, acc}
-
-          val ->
-            {:cont, acc <> val}
-        end
+        elem(elem(grid, new_x), new_y)
       end
-    end)
+    end
+
+    0..3
+    |> Enum.map(get_direction_string_idx)
+    |> Enum.join()
+  end
+
+  defp get_x_for_coord(grid, {x, y}) do
+    if x < 1 or x >= tuple_size(grid) - 1 or y < 1 or y >= tuple_size(elem(grid, 0)) - 1 do
+      nil
+    else
+      center = elem(elem(grid, x), y)
+      up_left = elem(elem(grid, x - 1), y - 1)
+      up_right = elem(elem(grid, x - 1), y + 1)
+      down_left = elem(elem(grid, x + 1), y - 1)
+      down_right = elem(elem(grid, x + 1), y + 1)
+
+      {up_left <> center <> down_right, down_left <> center <> up_right}
+    end
+  end
+
+  @valid_x_values ["MAS", "SAM"]
+
+  defp x_is_xmas?(nil) do
+    false
+  end
+
+  defp x_is_xmas?({left, right}) do
+    Enum.member?(@valid_x_values, left) and Enum.member?(@valid_x_values, right)
   end
 
   def get_tuple_grid_dimensions(grid) do
@@ -84,3 +107,4 @@ defmodule Day04 do
 end
 
 Day04.part1()
+Day04.part2()

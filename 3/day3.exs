@@ -18,6 +18,11 @@ end
 
 # states are named after what was most recently found: start, mul, comma
 defmodule Parser do
+  def get_slice_after_match(str, {match_idx, match_len}) do
+    str
+    |> String.slice((match_idx + match_len)..-1//1)
+  end
+
   defmodule Part1 do
     @segment_start_string "mul("
 
@@ -30,9 +35,8 @@ defmodule Parser do
         :nomatch ->
           0
 
-        {match_idx, len} ->
-          str
-          |> String.slice((match_idx + len)..-1//1)
+        match ->
+          Parser.get_slice_after_match(str, match)
           |> parse(:mul)
       end
     end
@@ -65,11 +69,6 @@ defmodule Parser do
 
     @deactivate_str "don't()"
 
-    defp get_slice_after_match(str, {match_idx, match_len}) do
-      str
-      |> String.slice((match_idx + match_len)..-1//1)
-    end
-
     def parse(str, :start) do
       off_match_result = :binary.match(str, @deactivate_str)
       start_match_result = :binary.match(str, @segment_start_string)
@@ -79,18 +78,15 @@ defmodule Parser do
           0
 
         {:nomatch, match} ->
-          str
-          |> get_slice_after_match(match)
+          Parser.get_slice_after_match(str, match)
           |> parse(:mul)
 
         {{off_match_idx, off_match_len}, {start_match_idx, start_match_len}} ->
           if off_match_idx < start_match_idx do
-            str
-            |> get_slice_after_match({off_match_idx, off_match_len})
+            Parser.get_slice_after_match(str, {off_match_idx, off_match_len})
             |> parse(:off)
           else
-            str
-            |> get_slice_after_match({start_match_idx, start_match_len})
+            Parser.get_slice_after_match(str, {start_match_idx, start_match_len})
             |> parse(:mul)
           end
       end
@@ -104,23 +100,22 @@ defmodule Parser do
       end
     end
 
-    def parse(str, :comma, num) do
-      case Integer.parse(str) do
-        :error -> parse(str, :start)
-        {num2, @segment_end_string <> remainder} -> num * num2 + parse(remainder, :start)
-        _ -> parse(str, :start)
-      end
-    end
-
     def parse(str, :off) do
       case :binary.match(str, @activate_str) do
         :nomatch ->
           0
 
         match ->
-          str
-          |> get_slice_after_match(match)
+          Parser.get_slice_after_match(str, match)
           |> parse(:start)
+      end
+    end
+
+    def parse(str, :comma, num) do
+      case Integer.parse(str) do
+        :error -> parse(str, :start)
+        {num2, @segment_end_string <> remainder} -> num * num2 + parse(remainder, :start)
+        _ -> parse(str, :start)
       end
     end
   end

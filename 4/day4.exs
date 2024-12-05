@@ -47,12 +47,10 @@ defmodule Day04 do
     |> IO.inspect()
   end
 
-  def directions do
-    [{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}]
-  end
+    @directions [{1, 0}, {0, 1}, {-1, 0}, {0, -1}, {1, 1}, {-1, -1}, {1, -1}, {-1, 1}]
 
   def get_all_direction_strings_for_coord(grid, coord) do
-    directions()
+    @directions
     |> Enum.map(fn direction ->
       get_direction_string(grid, coord, direction)
     end)

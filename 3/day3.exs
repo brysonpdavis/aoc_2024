@@ -81,14 +81,14 @@ defmodule Parser do
           Parser.get_slice_after_match(str, match)
           |> parse(:mul)
 
+        {{off_match_idx, off_match_len}, {start_match_idx, start_match_len}}
+        when off_match_idx < start_match_idx ->
+          Parser.get_slice_after_match(str, {off_match_idx, off_match_len})
+          |> parse(:off)
+
         {{off_match_idx, off_match_len}, {start_match_idx, start_match_len}} ->
-          if off_match_idx < start_match_idx do
-            Parser.get_slice_after_match(str, {off_match_idx, off_match_len})
-            |> parse(:off)
-          else
-            Parser.get_slice_after_match(str, {start_match_idx, start_match_len})
-            |> parse(:mul)
-          end
+          Parser.get_slice_after_match(str, {start_match_idx, start_match_len})
+          |> parse(:mul)
       end
     end
 
